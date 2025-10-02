@@ -1,9 +1,9 @@
-import numpy as np
 import torch
-from torch.utils import data
+from torch import nn
+from torch.utils.data import TensorDataset, DataLoader
 from d2l import torch as d2l
 
-# 生成数据集，带正态分布的噪声
+# 生成数据集，带高斯正态分布的噪声
 def synthetic_data(w, b, num_examples):
     """Generate y = Xw + b + noise.
 
@@ -13,53 +13,109 @@ def synthetic_data(w, b, num_examples):
         num_examples (int): 生成样本的数量
     """
     # num_examples(B)
-    # X(B,D)
+    # len(w) = D
+    # X(B,D) 
+    # 初始化X服从标准正态分布
     X = d2l.normal(mean=0, std=1, shape=(num_examples, len(w)))
-    
-    y = d2l.matmul(X, w) + b
-   
-    y += d2l.normal(mean=0, std=0.01, shape=y.shape)
+
+    # 初始化y
     # X(B,D)
+    # w(D)
+    # b(1)
+    # y(B,)
+    y = d2l.matmul(X, w) + b
+    # 初始化y,添加高斯正态分布噪声
+    # y(B,)
+    y += d2l.normal(mean=0, std=0.01, shape=y.shape)
+    # y(B,)->(B,1)
+    y = y.reshape(-1, 1)
 
-    return X, d2l.reshape(y, shape=(-1, 1))
+    return X, y
 
-true_w = torch.tensor([2, -3.4])
-true_b = 4.2
-features, labels = d2l.synthetic_data(true_w, true_b, 1000)
-
-def load_array(data_arrays, batch_size, is_train=True):  #@save
+# 加载数组数据
+def load_array(data_arrays, batch_size, is_train=True):
     """构造一个PyTorch数据迭代器"""
-    dataset = data.TensorDataset(*data_arrays)
-    return data.DataLoader(dataset, batch_size, shuffle=is_train)
-
-batch_size = 10
-data_iter = load_array((features, labels), batch_size)
-
-
-# nn是神经网络的缩写
-from torch import nn
-
-net = nn.Sequential(nn.Linear(2, 1))
-
-net[0].weight.data.normal_(0, 0.01)
-net[0].bias.data.fill_(0)
-
-loss = nn.MSELoss()
-
-trainer = torch.optim.SGD(net.parameters(), lr=0.03)
-
-num_epochs = 3
-for epoch in range(num_epochs):
-    for X, y in data_iter:
-        l = loss(net(X) ,y)
-        trainer.zero_grad()
-        l.backward()
-        trainer.step()
-    l = loss(net(features), labels)
-    print(f'epoch {epoch + 1}, loss {l:f}')
+    dataset = TensorDataset(*data_arrays)
+    # 在 PyTorch 的 DataLoader 中，数据是在每个 epoch 开始时、生成 batch 之前被打乱的，
+    # 具体发生在 DataLoader 内部创建数据索引顺序的环节。
+    # 这有助于模型泛化，避免过拟合
+    return DataLoader(dataset, batch_size, shuffle=is_train)
 
 
-w = net[0].weight.data
-print('w的估计误差：', true_w - w.reshape(true_w.shape))
-b = net[0].bias.data
-print('b的估计误差：', true_b - b)
+# 定义线性回归模型
+class LinearRegressionModel(nn.Module):
+    def __init__(self):
+        super(LinearRegressionModel, self).__init__()
+        # 定义线性层
+        self.linear = nn.Linear(2, 1)
+        # 初始化权重和偏置,一般不做初始化,因为默认初始化已经足够好
+        self.linear.weight.data.normal_(0, 0.01)
+        self.linear.bias.data.fill_(0)
+    
+    def forward(self, x):
+        return self.linear(x)
+
+
+
+def train_Linear_Regression(model, data_iter, features, labels, num_epochs=3):
+    # 定义损失函数
+    loss = nn.MSELoss()
+    # 定义优化器
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.03)
+    # 训练模型epoch
+    for epoch in range(num_epochs):
+        # 训练模型batch
+        for X, y in data_iter:
+            # 1. 前向传播，创建新计算图，不会修改梯度
+            # y_hat(B,1)
+            y_hat = model(X)
+            # 2. 计算损失，扩展计算图，不会修改梯度
+            l = loss(y_hat, y)
+            # 3. 梯度清零，不修改计算图，会将梯度设为0
+            optimizer.zero_grad()
+            # 4. 反向传播，不修改计算图，会更新梯度
+            l.backward()
+            # 5. 更新参数，不修改计算图，会更新梯度
+            optimizer.step()
+            # 6. 循环结束，销毁计算图，释放内存
+
+        # 每个epoch结束,计算并打印损失
+        with torch.no_grad():
+            # 前向传播，此时不会创建新计算图，不会修改梯度
+            y_hat = model(features)
+            # 计算损失，此时不会扩展计算图，不会修改梯度
+            l = loss(y_hat, labels)
+        # 打印损失
+        print(f'epoch {epoch + 1}, loss {l:f}')
+
+def main():
+    # true_w(D)
+    true_w = torch.tensor([2, -3.4])
+    # true_b(1)
+    true_b = 4.2
+    # 生成数据集
+    # features(B,D)
+    # labels(B,1)
+    features, labels = d2l.synthetic_data(true_w, true_b, 1000)
+    # 加载数据集
+    batch_size = 10
+    data_iter = load_array((features, labels), batch_size)
+
+    # 创建模型
+    model = LinearRegressionModel()
+    train_Linear_Regression(model, data_iter, features, labels, num_epochs=10)
+
+
+
+
+
+    w = model.linear.weight.data
+    print('w的估计误差：', true_w - w.reshape(true_w.shape))
+    b = model.linear.bias.data
+    print('b的估计误差：', true_b - b)
+
+if __name__ == '__main__':
+    main()
+
+
+
