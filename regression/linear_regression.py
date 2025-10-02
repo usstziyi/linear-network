@@ -3,21 +3,19 @@
 """
 
 
+from torch import nn
 
-"""
-(在高斯噪声假设下)
-为什么最小化均方误差(MSE) = 最大化似然(MLE,Maximum Likelihood Estimation)
 
-假设我们的模型输出为 y，真实标签为 t，噪声服从高斯分布 N(0, σ^2)。
-则似然函数为：
-L(θ) = Π p(t_i | y_i, θ)
-= Π N(t_i | y_i, σ^2)
-= Π exp(-0.5 * (t_i - y_i)^2 / σ^2) / √(2 * π * σ^2)
-取负对数，得到均方误差：
-MSE(θ) = -1/n * Σ (t_i - y_i)^2
-= -1/n * Σ (t_i - w^T x_i - b)^2
-= -1/n * Σ (t_i - ŷ_i)^2
-其中 ŷ_i = w^T x_i + b 为模型的预测输出。
-我们的目标是最小化均方误差，即找到最优的 w 和 b。
-这等价于最大化似然函数，即找到使得 p(t | x, θ) 最大的 w 和 b。
-"""
+
+# 定义线性回归模型
+class LinearRegressionModel(nn.Module):
+    def __init__(self):
+        super(LinearRegressionModel, self).__init__()
+        # 定义线性层
+        self.linear = nn.Linear(2, 1)
+        # 初始化权重和偏置,一般不做初始化,因为默认初始化已经足够好
+        self.linear.weight.data.normal_(0, 0.01)
+        self.linear.bias.data.fill_(0)
+    
+    def forward(self, x):
+        return self.linear(x)
