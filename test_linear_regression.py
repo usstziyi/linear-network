@@ -110,16 +110,23 @@ def main():
 
     # 创建模型
     model = LinearRegressionModel()
+    # 训练模型
     train_Linear_Regression(model, data_iter, features, labels, num_epochs=10)
-
-
-
-
-
+    # 打印模型参数
     w = model.linear.weight.data
     print('w的估计误差：', true_w - w.reshape(true_w.shape))
     b = model.linear.bias.data
     print('b的估计误差：', true_b - b)
+
+
+    # 测试模型
+    with torch.no_grad():
+        # test_features(B,D)
+        test_features = torch.normal(mean=0, std=1, size=(10, 2)) # 10个样本，每个样本2个特征，均值为0，标准差为1
+        print('test_features:', test_features)
+        # test_labels(B,1)
+        test_labels = model(test_features)
+        print('test_labels:', test_labels)
 
 if __name__ == '__main__':
     main()
