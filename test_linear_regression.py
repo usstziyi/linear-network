@@ -64,8 +64,8 @@ MSE(θ) = -1/n * Σ (t_i - y_i)^2
 这等价于最大化似然函数，即找到使得 p(t | x, θ) 最大的 w 和 b。
 """
 def train_Linear_Regression(model, data_iter, features, labels, num_epochs=3):
-    # 定义损失函数
-    loss = nn.MSELoss()
+    # 定义损失函数：均方误差损失函数
+    loss = nn.MSELoss() # 默认 reduction='mean'
     # 定义优化器
     optimizer = torch.optim.SGD(model.parameters(), lr=0.03)
     # 训练模型epoch
@@ -76,7 +76,7 @@ def train_Linear_Regression(model, data_iter, features, labels, num_epochs=3):
             # y_hat(B,1)
             y_hat = model(X)
             # 2. 损失传播，扩展计算图，暂时不用梯度图
-            l = loss(y_hat, y)
+            l = loss(y_hat, y) # 此时l是标量：0维张量
             # 3. 梯度清零，不修改计算图，会将梯度图设为0
             optimizer.zero_grad()
             # 4. 反向传播，依据计算图，会更新梯度图
