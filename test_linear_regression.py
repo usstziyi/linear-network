@@ -72,24 +72,25 @@ def train_Linear_Regression(model, data_iter, features, labels, num_epochs=3):
     for epoch in range(num_epochs):
         # 训练模型batch
         for X, y in data_iter:
-            # 1. 前向传播，创建新计算图，不会修改梯度
+            # 1. 前向传播，创建新计算图，暂时不用梯度图
             # y_hat(B,1)
             y_hat = model(X)
-            # 2. 计算损失，扩展计算图，不会修改梯度
+            # 2. 损失传播，扩展计算图，暂时不用梯度图
             l = loss(y_hat, y)
-            # 3. 梯度清零，不修改计算图，会将梯度设为0
+            # 3. 梯度清零，不修改计算图，会将梯度图设为0
             optimizer.zero_grad()
-            # 4. 反向传播，不修改计算图，会更新梯度
+            # 4. 反向传播，依据计算图，会更新梯度图
             l.backward()
-            # 5. 更新参数，不修改计算图，会更新梯度
+            # 5. 依据梯度图，原地更新参数w,b，不修改计算图，不修改梯度图
             optimizer.step()
-            # 6. 循环结束，销毁计算图，释放内存
+            # 6. 循环结束，计算图会被销毁，梯度图会被在下一轮循环中被清零
 
         # 每个epoch结束,计算并打印损失
+        # 自动微分系统（autograd）只在需要计算梯度时才记录操作并构建计算图
         with torch.no_grad():
-            # 前向传播，此时不会创建新计算图，不会修改梯度
+            # 前向传播，此时不会创建新计算图，暂时不使用梯度图
             y_hat = model(features)
-            # 计算损失，此时不会扩展计算图，不会修改梯度
+            # 计算损失，此时不会扩展计算图，暂时不使用梯度图
             l = loss(y_hat, labels)
         # 打印损失
         print(f'epoch {epoch + 1}, loss {l:f}')
