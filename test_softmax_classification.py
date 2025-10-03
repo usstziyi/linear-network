@@ -34,6 +34,7 @@ def load_data_fashion_mnist(batch_size, resize=None):  #@save
 # 训练Softmax分类模型
 def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
     # 定义损失函数：交叉熵损失函数
+    # 在训练时，通常配合 nn.CrossEntropyLoss 使用，它内部会自动对 logits 应用 softmax 并计算交叉熵损失。
     loss = nn.CrossEntropyLoss(reduction='none')
     # 定义优化器：随机梯度下降（SGD）优化器
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
@@ -45,9 +46,9 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
         train_metrics = d2l.Accumulator(3)
         model.train()
         for X, y in train_iter:
+            y_hat = model(X) # 前向传播, 计算模型输出 logits
+            l = loss(y_hat, y) # 内部会自动对 logits 应用 softmax 并计算交叉熵损失
             optimizer.zero_grad()
-            y_hat = model(X)
-            l = loss(y_hat, y)
             l.mean().backward()
             optimizer.step()
             train_metrics.add(l.sum(), d2l.accuracy(y_hat, y), y.numel())
@@ -57,8 +58,8 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
         with torch.no_grad():
             test_metrics = d2l.Accumulator(3)
             for X, y in test_iter:
-                y_hat = model(X)
-                l = loss(y_hat, y)
+                y_hat = model(X) # 前向传播, 计算模型输出 logits
+                l = loss(y_hat, y) # 内部会自动对 logits 应用 softmax 并计算交叉熵损失
                 test_metrics.add(l.sum(), d2l.accuracy(y_hat, y), y.numel())
             test_loss, test_acc, test_samples = test_metrics
             print(f"epoch {epoch+1}: train loss {train_loss/train_samples:.4f}, "
