@@ -66,12 +66,12 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
                 l = loss(y_hat, y) # 内部会自动对 logits 应用 softmax 并计算交叉熵损失
                 test_metrics.add(l.sum(), d2l.accuracy(y_hat, y), y.numel())
             test_loss, test_acc, test_samples = test_metrics
-            timer.stop()  # 停止计时
+            epoch_time = timer.stop()  # 停止计时并返回最近一次的时间
             print(f"epoch {(epoch+1):2d}/{num_epochs}: train loss {train_loss/train_samples:.4f}, "
                   f"train acc {train_acc/train_samples:.4f}, "
                   f"test loss {test_loss/test_samples:.4f}, "
                   f"test acc {test_acc/test_samples:.4f}, "
-                  f"time {timer.sum():.2f} sec")
+                  f"time {epoch_time:.2f} sec")
     
 
 def main():

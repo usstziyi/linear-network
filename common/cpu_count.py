@@ -17,8 +17,8 @@ def get_dataloader_workers():  #@save
     # linux
     else:
         max_workers = multiprocessing.cpu_count()
-        print(f'linux max_workers: {max_workers}')
-        return max_workers
+        # print(f'linux max_workers: {max_workers}')
+        return max_workers - 1
 
 
 def main():
