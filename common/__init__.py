@@ -4,11 +4,15 @@ from .normal import normal
 from .runtime import Timer
 from .softmax import Softmax
 from .cross_entropy import cross_entropy
+from .accumulator import Accumulator
+
+
 
 __all__ = [
     'get_dataloader_workers',
     'normal',
     'Timer',
     'Softmax',
-    'cross_entropy'
+    'cross_entropy',
+    'Accumulator'
 ]

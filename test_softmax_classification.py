@@ -6,7 +6,7 @@ from torchvision import transforms
 from d2l import torch as d2l
 from common import get_dataloader_workers
 from classification import SoftmaxClassification
-from common import Timer
+from common import Timer, Accumulator
 
 
 
@@ -47,7 +47,7 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
     for epoch in range(num_epochs):
         timer.start()  # 开始计时
         # 训练模型并计算训练损失和训练准确率
-        train_metrics = d2l.Accumulator(3)
+        train_metrics = Accumulator(3)
         model.train()
         for X, y in train_iter:
             y_hat = model(X) # 前向传播, 计算模型输出 logits
