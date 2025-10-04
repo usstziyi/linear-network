@@ -76,8 +76,11 @@ def train_Linear_Regression(model, data_iter, features, labels, num_epochs=3):
     # 训练模型epoch
     for epoch in range(num_epochs):
         # 训练模型batch
+        # X(B,D)
+        # y(B,1)
         for X, y in data_iter:
             # 1. 前向传播，创建新计算图，暂时不用梯度图
+            # X(B,D)=(1000,2)
             # y_hat(B,1)
             y_hat = model(X)
             # 2. 损失传播，扩展计算图，暂时不用梯度图
@@ -109,7 +112,7 @@ def main():
     # 生成数据集
     # features(B,D)
     # labels(B,1)
-    features, labels = d2l.synthetic_data(true_w, true_b, 1000)
+    features, labels = synthetic_data(true_w, true_b, 1000)
     # 加载数据集
     batch_size = 10
     data_iter = load_array((features, labels), batch_size)

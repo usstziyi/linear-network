@@ -16,7 +16,7 @@ class SoftmaxClassification(nn.Module):
         super().__init__()
         # 展平层：将输入张量（如图像）展平成一维向量
         self.flatten = nn.Flatten()
-        # 全连接层：将展平后的向量映射到输出类别数（10个类别）
+        # 全连接层：将展平后的向量映射到输出类别数（10个类别）:输入特征数为784,输出特征数为10
         self.linear = nn.Linear(784, 10)
 
     def forward(self, X):
