@@ -6,7 +6,7 @@ from torchvision import transforms
 from d2l import torch as d2l
 from common import get_dataloader_workers
 from classification import SoftmaxClassification
-from common import Timer, Accumulator
+from common import Timer, Accumulator, Animator
 
 
 
@@ -43,6 +43,12 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
     # 初始化计时器
     timer = Timer()
 
+    # 初始化动画器
+    animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],legend=['train loss', 'train acc', 'test acc'])
+    animator.enable_interactive()
+
+
+
     # 训练模型
     for epoch in range(num_epochs):
         timer.start()  # 开始计时
@@ -72,6 +78,12 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
                   f"test loss {test_loss/test_samples:.4f}, "
                   f"test acc {test_acc/test_samples:.4f}, "
                   f"time {epoch_time:.2f} sec")
+            # 更新动画器
+            animator.add(epoch+1, (train_loss/train_samples, train_acc/train_samples, test_acc/test_samples))
+    
+    # 关闭交互模式
+    animator.disable_interactive()
+
     
 
 def main():
