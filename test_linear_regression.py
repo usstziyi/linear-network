@@ -19,17 +19,17 @@ def synthetic_data(w, b, num_examples):
     # len(w) = D
     # X(B,D) 
     # 初始化X服从标准正态分布
-    X = d2l.normal(mean=0, std=1, shape=(num_examples, len(w)))
+    X = torch.normal(mean=0, std=1, size=(num_examples, len(w)))
 
     # 初始化y
     # X(B,D)
     # w(D)
     # b(1)
     # y(B,)
-    y = d2l.matmul(X, w) + b
+    y = torch.matmul(X, w) + b
     # 初始化y,添加高斯正态分布噪声
     # y(B,)
-    y += d2l.normal(mean=0, std=0.01, shape=y.shape)
+    y += torch.normal(mean=0, std=0.01, size=y.shape)
     # y(B,)->(B,1)
     y = y.reshape(-1, 1)
 

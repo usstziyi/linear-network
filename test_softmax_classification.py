@@ -44,7 +44,7 @@ def train_SoftMaxClassification(model, train_iter, test_iter, num_epochs=10):
     timer = Timer()
 
     # 初始化动画器
-    animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],legend=['train loss', 'train acc', 'test acc'])
+    animator = Animator(xlabel='epoch', xlim=[1, 10], ylim=[0.3, 0.9],legend=['train loss', 'train acc', 'test acc'])
     animator.enable_interactive()
 
 
